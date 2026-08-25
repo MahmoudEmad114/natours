@@ -7,6 +7,7 @@ const mongoSanitize = require('express-mongo-sanitize'); // npm i express-mongo-
 const xss = require('xss-clean') // npm i xss-clean (package)
 const hpp = require('hpp'); // npm i hpp (package)
 const cookieParser = require('cookie-parser')
+const compression = require('compression');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController')
@@ -70,6 +71,8 @@ app.use(hpp({
 //     console.log('Hello from the middleware');
 //     next();
 // });
+
+app.use(compression());
 
 // Test middleware
 app.use((req, res, next) => {

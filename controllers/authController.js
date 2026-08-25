@@ -51,12 +51,14 @@ exports.signup = catchAsync(async (req, res, next) => {
 })
 
 exports.logout = (req, res) => {
-    res.cookie('jwt', 'loogedout', {
-        expires: new Date(Date.now() + 10 * 1000),
+    res.clearCookie('jwt', {
         httpOnly: true
-    })
-    res.status(200).json({ status: 'success' })
-}
+    });
+
+    res.status(200).json({
+        status: 'success'
+    });
+};
 
 exports.login = catchAsync(async (req, res, next) => {
     // const email = req.body.email;

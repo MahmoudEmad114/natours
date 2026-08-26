@@ -18,6 +18,7 @@ const bookingRouter = require('./routes/bookingRoutes');
 const viewRouter = require('./routes/viewRoutes');
 
 const app = express();
+app.set('trust proxy', 1);
 // app.set('query parser', 'extended');
 
 app.set('view engine', 'pug');
@@ -43,7 +44,6 @@ const limiter = rateLimit({
     message: 'Too many requests for this IP, please try again in an hour!'
 })
 app.use('/api', limiter);
-
 
 console.log(process.env.NODE_ENV);
 

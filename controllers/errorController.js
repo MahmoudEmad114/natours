@@ -92,7 +92,7 @@ module.exports = (err, req, res, next) => {
 
     if (process.env.NODE_ENV === 'development') {
         sendErrorDev(err, req, res)
-    } else if (process.env.NODE_ENV === 'production ') {
+    } else if (process.env.NODE_ENV.trim() === 'production') {
         // i used .trim() because there is a problem with package.json
         let error = { ...err };
         // must add this 3 fields 

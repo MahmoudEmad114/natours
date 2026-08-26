@@ -16,14 +16,27 @@ const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
 const viewRouter = require('./routes/viewRoutes');
+const cors = require('cors')
 
 const app = express();
+app.enable('trust proxy');
 // app.set('query parser', 'extended');
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'))
 
 // ! 1.) GLOBAL MIDDLEWARES
+// Implement CORS
+app.use(cors());
+// Access-Control-Allow-Origin
+// api.natours.com, front-end natours.com
+// app.use(cors({
+//     origin: 'https://www.natorus.com'
+// }))
+
+app.options('*', cors());
+// app.options('/api/v1/tours/:id', cors());
+
 // serving static file 
 app.use(express.static(path.join(__dirname, 'public')));
 

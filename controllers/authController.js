@@ -16,10 +16,12 @@ const createSendToken = (user, statusCode, res) => {
     const token = signToken(user._id);
     const cookieOptions = {
         expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
-        // secure: true,
-        httpOnly: true
+        secure: process.env.NODE_ENV.trim() === 'production',
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/'
     }
-    if (process.env.NODE_ENV.trim() === 'production') cookieOptions.secure = true;
+    // if (process.env.NODE_ENV.trim() === 'production') cookieOptions.secure = true;
 
     res.cookie('jwt', token, cookieOptions)
 
@@ -52,7 +54,10 @@ exports.signup = catchAsync(async (req, res, next) => {
 
 exports.logout = (req, res) => {
     res.clearCookie('jwt', {
-        httpOnly: true
+        httpOnly: true,
+        secure: process.env.NODE_ENV.trim() === 'production',
+        sameSite: 'lax',
+        path: '/'
     });
 
     res.status(200).json({

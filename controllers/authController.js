@@ -49,16 +49,23 @@ exports.signup = catchAsync(async (req, res, next) => {
     // console.log(url);
     try {
         await new Email(newUser, url).sendWelcome();
+
+        console.log(`Welcome email sent to ${newUser.email}`);
     } catch (err) {
-        console.error('WELCOME EMAIL ERROR:', err);
+        console.error('WELCOME EMAIL ERROR:', {
+            message: err.message,
+            code: err.code,
+            response: err.response
+        });
     }
     createSendToken(newUser, 201, req, res);
 })
 
 exports.logout = (req, res) => {
-    res.clearCookie('jwt', {
+    res.cookie('jwt', 'loggedout', {
+        expires: new Date(Date.now() + 10 * 1000),
         httpOnly: true,
-        secure: process.env.NODE_ENV.trim() === 'production',
+        secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
         sameSite: 'lax',
         path: '/'
     });

@@ -19,7 +19,7 @@ const viewRouter = require('./routes/viewRoutes');
 const cors = require('cors')
 
 const app = express();
-app.enable('trust proxy');
+app.set('trust proxy', 1);
 // app.set('query parser', 'extended');
 
 app.set('view engine', 'pug');

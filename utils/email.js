@@ -11,31 +11,29 @@ module.exports = class Email {
     }
 
     newTransport() {
-        if (process.env.NODE_ENV.trim() === 'production') {
-            // Sendgrid
-            return nodemailer.createTransport({
-                host: 'smtp.sendgrid.net',
-                port: 587,
-                secure: false,
-                auth: {
-                    user: process.env.SENDGRID_USERNAME,
-                    pass: process.env.SENDGRID_PASSWORD
-                }
-            });
-        }
+        console.log('EMAIL 1 - Creating SendGrid transport');
 
-        return nodemailer.createTransport({
-            host: process.env.EMAIL_HOST,
-            port: process.env.EMAIL_PORT,
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.sendgrid.net',
+            port: 587,
+            secure: false,
             auth: {
-                user: process.env.EMAIL_USERNAME,
-                pass: process.env.EMAIL_PASSWORD
-            }
+                user: process.env.SENDGRID_USERNAME,
+                pass: process.env.SENDGRID_PASSWORD
+            },
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 10000
         });
+
+        console.log('EMAIL 2 - Transport created');
+
+        return transporter;
     }
 
     // Send the actual email
     async send(template, subject) {
+        console.log('EMAIL 3 - Rendering template');
         // 1) Render HTML based on a pug template
         const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
             firstName: this.firstName,
@@ -43,6 +41,7 @@ module.exports = class Email {
             subject
         });
 
+        console.log('EMAIL 4 - Template rendered');
         // 2) Define email options
         const mailOptions = {
             from: this.from,
@@ -52,8 +51,10 @@ module.exports = class Email {
             text: htmlToText.convert(html)
         };
 
+        console.log('EMAIL 5 - Before sendMail');
         // 3) Create a transport and send email
         await this.newTransport().sendMail(mailOptions);
+        console.log('EMAIL 6 - sendMail finished');
     }
 
     async sendWelcome() {

@@ -1341,7 +1341,9 @@ body {
 }
 
 .login-form,
-.signup-form {
+.signup-form,
+.forgotPassword-form,
+.resetPassword-form {
   margin: 0 auto;
   max-width: 55rem;
   background-color: #fff;
@@ -1394,6 +1396,26 @@ body {
   font-size: 1.6rem;
   font-weight: 700;
   margin-bottom: 0.75rem;
+}
+
+.form__link {
+  display: inline-block;
+  margin-left: 1.5rem;
+  color: #55c57a;
+  font-size: 1.4rem;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.form__link:hover {
+  color: #28b487;
+  border-bottom-color: #28b487;
+  transform: translateY(-1px);
+}
+
+.form__link:active {
+  transform: translateY(0);
 }
 
 .form__photo-upload {

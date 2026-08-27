@@ -8,6 +8,7 @@ const xss = require('xss-clean') // npm i xss-clean (package)
 const hpp = require('hpp'); // npm i hpp (package)
 const cookieParser = require('cookie-parser')
 const compression = require('compression');
+const cors = require('cors')
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController')
@@ -16,7 +17,6 @@ const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
 const viewRouter = require('./routes/viewRoutes');
-const cors = require('cors')
 
 const app = express();
 app.set('trust proxy', 1);

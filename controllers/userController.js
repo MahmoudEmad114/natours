@@ -1,9 +1,17 @@
 const multer = require('multer');
 const sharp = require('sharp')
+const { v2: cloudinary } = require('cloudinary');
+
 const AppError = require('./../utils/appError');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const factory = require('./handlerFactory')
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+})
 
 // const multerStorage = multer.diskStorage({
 //     destination: (req, file, cb) => { // cb => callback
@@ -38,12 +46,30 @@ exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
 
     req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`
 
-    await sharp(req.file.buffer)
+    const buffer = await sharp(req.file.buffer)
         .resize(500, 500)
         .toFormat('jpeg')
         .jpeg({ quality: 90 })
-        .toFile(`public/img/users/${req.file.filename}`);
+        .toBuffer();
+    // .toFile(`public/img/users/${req.file.filename}`);
 
+    const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+            {
+                folder: 'natours/users',
+                public_id: `user-${req.user.id}`,
+                resource_type: 'image',
+                format: 'jpg'
+            },
+            (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+            }
+        )
+
+        uploadStream.end(buffer);
+    })
+    req.file.filename = result.secure_url;
     next();
 })
 

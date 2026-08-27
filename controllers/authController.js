@@ -47,22 +47,23 @@ exports.signup = catchAsync(async (req, res, next) => {
         passwordConfirm: req.body.passwordConfirm
     });
     console.log('SIGNUP 2 - USER CREATED');
-    // const url = `${req.protocol}://${req.get('host')}/me`;
-    // // console.log(url);
-    // try {
-    //     await new Email(newUser, url).sendWelcome();
-    //     console.log('SIGNUP 3 - EMAIL SENT');
-    //     console.log(`Welcome email sent to ${newUser.email}`);
-    // } catch (err) {
-    //     console.error('WELCOME EMAIL ERROR:', {
-    //         message: err.message,
-    //         code: err.code,
-    //         response: err.response
-    //     });
-    //     console.error('SIGNUP EMAIL ERROR:', err.message);
-    // }
+    const url = `${req.protocol}://${req.get('host')}/me`;
+    // console.log(url);
+    try {
+        await new Email(newUser, url).sendWelcome();
+        console.log('SIGNUP 3 - EMAIL SENT');
+        console.log(`Welcome email sent to ${newUser.email}`);
+    } catch (err) {
+        console.error('WELCOME EMAIL ERROR:', {
+            message: err.message,
+            code: err.code,
+            response: err.response
+        });
+        console.error('SIGNUP EMAIL ERROR:', err.message);
+    }
+    console.log('SIGNUP 4 - BEFORE TOKEN');
     createSendToken(newUser, 201, req, res);
-    console.log('SIGNUP 3 - RESPONSE SENT');
+    console.log('SIGNUP 5 - RESPONSE SENT');
 })
 
 exports.logout = (req, res) => {

@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+const axios = require('axios');
 const pug = require('pug');
 const htmlToText = require('html-to-text');
 
@@ -10,55 +10,64 @@ module.exports = class Email {
         this.from = `Natours <${process.env.EMAIL_FROM}>`;
     }
 
-    newTransport() {
-        console.log('EMAIL 1 - Creating SendGrid transport');
-
-        const transporter = nodemailer.createTransport({
-            host: 'smtp.sendgrid.net',
-            port: 587,
-            secure: false,
-            auth: {
-                user: process.env.SENDGRID_USERNAME,
-                pass: process.env.SENDGRID_PASSWORD
-            },
-            connectionTimeout: 10000,
-            greetingTimeout: 10000,
-            socketTimeout: 10000
-        });
-
-        console.log('EMAIL 2 - Transport created');
-
-        return transporter;
-    }
-
-    // Send the actual email
     async send(template, subject) {
-        console.log('EMAIL 3 - Rendering template');
-        // 1) Render HTML based on a pug template
-        const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
-            firstName: this.firstName,
-            url: this.url,
-            subject
-        });
+        // 1) Render HTML based on a Pug template
+        const html = pug.renderFile(
+            `${__dirname}/../views/email/${template}.pug`,
+            {
+                firstName: this.firstName,
+                url: this.url,
+                subject
+            }
+        );
 
-        console.log('EMAIL 4 - Template rendered');
-        // 2) Define email options
-        const mailOptions = {
-            from: this.from,
-            to: this.to,
-            subject,
-            html,
-            text: htmlToText.convert(html)
-        };
+        // 2) Convert HTML to plain text
+        const text = htmlToText.convert(html);
 
-        console.log('EMAIL 5 - Before sendMail');
-        // 3) Create a transport and send email
-        await this.newTransport().sendMail(mailOptions);
-        console.log('EMAIL 6 - sendMail finished');
+        // 3) Send email using SendGrid Web API
+        await axios.post(
+            'https://api.sendgrid.com/v3/mail/send',
+            {
+                personalizations: [
+                    {
+                        to: [
+                            {
+                                email: this.to
+                            }
+                        ]
+                    }
+                ],
+                from: {
+                    email: process.env.EMAIL_FROM,
+                    name: 'Natours'
+                },
+                subject,
+                content: [
+                    {
+                        type: 'text/plain',
+                        value: text
+                    },
+                    {
+                        type: 'text/html',
+                        value: html
+                    }
+                ]
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                timeout: 10000
+            }
+        );
     }
 
     async sendWelcome() {
-        await this.send('welcome', 'Welcome to the Natours Family!');
+        await this.send(
+            'welcome',
+            'Welcome to the Natours Family!'
+        );
     }
 
     async sendPasswordReset() {
@@ -68,6 +77,77 @@ module.exports = class Email {
         );
     }
 };
+
+
+// const nodemailer = require('nodemailer');
+// const pug = require('pug');
+// const htmlToText = require('html-to-text');
+
+// module.exports = class Email {
+//     constructor(user, url) {
+//         this.to = user.email;
+//         this.firstName = user.name.split(' ')[0];
+//         this.url = url;
+//         this.from = `Natours <${process.env.EMAIL_FROM}>`;
+//     }
+
+//     newTransport() {
+//         if (process.env.NODE_ENV.trim() === 'production') {
+//             // Sendgrid
+//             return nodemailer.createTransport({
+//                 host: 'smtp.sendgrid.net',
+//                 port: 587,
+//                 secure: false,
+//                 auth: {
+//                     user: process.env.SENDGRID_USERNAME,
+//                     pass: process.env.SENDGRID_PASSWORD
+//                 }
+//             });
+//         }
+
+//         return nodemailer.createTransport({
+//             host: process.env.EMAIL_HOST,
+//             port: process.env.EMAIL_PORT,
+//             auth: {
+//                 user: process.env.EMAIL_USERNAME,
+//                 pass: process.env.EMAIL_PASSWORD
+//             }
+//         });
+//     }
+
+//     // Send the actual email
+//     async send(template, subject) {
+//         // 1) Render HTML based on a pug template
+//         const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
+//             firstName: this.firstName,
+//             url: this.url,
+//             subject
+//         });
+
+//         // 2) Define email options
+//         const mailOptions = {
+//             from: this.from,
+//             to: this.to,
+//             subject,
+//             html,
+//             text: htmlToText.convert(html)
+//         };
+
+//         // 3) Create a transport and send email
+//         await this.newTransport().sendMail(mailOptions);
+//     }
+
+//     async sendWelcome() {
+//         await this.send('welcome', 'Welcome to the Natours Family!');
+//     }
+
+//     async sendPasswordReset() {
+//         await this.send(
+//             'passwordReset',
+//             'Your password reset token (valid for only 10 minutes)'
+//         );
+//     }
+// };
 
 
 // const sendEmail = async options => {
